@@ -2,6 +2,9 @@
 
 A minimal calendar widget for Android. Pure black, nothing else.
 
+<img width="1136" height="1021" alt="image" src="https://github.com/user-attachments/assets/983bbc32-0357-4def-8d2c-ca17dab45b1f" />
+
+
 - **Pure black.** True #000000 background with a single accent for today.
 - **Resize freely.** Drag it to any size and the grid scales to fit.
 - **Browse months.** Tap ‹ or › to move. Tap the month to pick any date.
