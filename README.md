@@ -2,8 +2,6 @@
 
 A minimal calendar widget for Android. Pure black, nothing else.
 
- ![SimpleCalendarWidget Screenshot](file:///C:/Users/BARCELO/AppData/Local/Google/AndroidStudio2026.2.1/projects/simplecalendarwidget.fbd5e51d/.artifacts/0766e2f8-2588-44dc-8725-49ce7d73f0a7/screenshot.png) 
-
 - **Pure black.** True #000000 background with a single accent for today.
 - **Resize freely.** Drag it to any size and the grid scales to fit.
 - **Browse months.** Tap ‹ or › to move. Tap the month to pick any date.
