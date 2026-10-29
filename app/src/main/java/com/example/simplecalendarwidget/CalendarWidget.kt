@@ -2,11 +2,13 @@ package com.example.simplecalendarwidget
 
 import android.content.Context
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.ImageProvider
 import androidx.glance.LocalSize
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
@@ -24,9 +26,11 @@ import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
+import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
+import androidx.glance.layout.size
 import androidx.glance.layout.width
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.FontWeight
@@ -62,11 +66,15 @@ class CalendarWidget : GlanceAppWidget() {
             val gridStartDate = firstOfMonth.minusDays(daysBefore.toLong())
 
             val cellWidth = size.width / 7f
-            val cellHeight = size.height / 8.2f
-            val scale = minOf(cellWidth.value, cellHeight.value)
+            val headerHeight = maxOf(48.dp, size.height * 0.12f)
+            val weekdayHeight = size.height * 0.10f
+            val rowHeight = (size.height - headerHeight - weekdayHeight) / 6f
+
+            val scale = minOf(cellWidth.value, rowHeight.value)
             val textSize = (scale * 0.42f).sp
-            val headerTextSize = (scale * 0.5f).sp
+            val headerTextSize = (scale * 0.48f).sp
             val navTextSize = (scale * 0.65f).sp
+            val circleSize = (scale * 0.82f).dp
 
             val white = ColorProvider(day = Color.White, night = Color.White)
             val gray = ColorProvider(day = Color(0xFFAAAAAA), night = Color(0xFFAAAAAA))
@@ -74,47 +82,67 @@ class CalendarWidget : GlanceAppWidget() {
 
             Column(
                 modifier = GlanceModifier.fillMaxSize().background(Color.Black),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(
-                    modifier = GlanceModifier.fillMaxWidth().height(cellHeight * 1.2f),
+                    modifier = GlanceModifier.fillMaxWidth().height(headerHeight),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "‹",
-                        style = TextStyle(color = white, fontSize = navTextSize, textAlign = TextAlign.Center),
-                        modifier = GlanceModifier.width(cellWidth * 1.2f).clickable(actionRunCallback<ChangeMonthAction>(actionParametersOf(ChangeMonthAction.DELTA_KEY to -1)))
-                    )
-                    Text(
-                        text = targetYearMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy", locale)),
-                        style = TextStyle(color = white, fontSize = headerTextSize, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center),
-                        modifier = GlanceModifier.defaultWeight().clickable(actionRunCallback<ChangeMonthAction>(actionParametersOf(ChangeMonthAction.DELTA_KEY to 0)))
-                    )
-                    Text(
-                        text = "›",
-                        style = TextStyle(color = white, fontSize = navTextSize, textAlign = TextAlign.Center),
-                        modifier = GlanceModifier.width(cellWidth * 1.2f).clickable(actionRunCallback<ChangeMonthAction>(actionParametersOf(ChangeMonthAction.DELTA_KEY to 1)))
-                    )
+                    Box(
+                        modifier = GlanceModifier.width(maxOf(cellWidth * 1.2f, 48.dp)).fillMaxHeight()
+                            .clickable(actionRunCallback<ChangeMonthAction>(actionParametersOf(ChangeMonthAction.DELTA_KEY to -1))),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "‹",
+                            style = TextStyle(color = white, fontSize = navTextSize, textAlign = TextAlign.Center)
+                        )
+                    }
+
+                    Box(
+                        modifier = GlanceModifier.defaultWeight().fillMaxHeight()
+                            .clickable(actionRunCallback<ChangeMonthAction>(actionParametersOf(ChangeMonthAction.DELTA_KEY to 0))),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = targetYearMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy", locale)),
+                            style = TextStyle(color = white, fontSize = headerTextSize, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                        )
+                    }
+
+                    Box(
+                        modifier = GlanceModifier.width(maxOf(cellWidth * 1.2f, 48.dp)).fillMaxHeight()
+                            .clickable(actionRunCallback<ChangeMonthAction>(actionParametersOf(ChangeMonthAction.DELTA_KEY to 1))),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "›",
+                            style = TextStyle(color = white, fontSize = navTextSize, textAlign = TextAlign.Center)
+                        )
+                    }
                 }
 
                 Row(
-                    modifier = GlanceModifier.fillMaxWidth().height(cellHeight),
+                    modifier = GlanceModifier.fillMaxWidth().height(weekdayHeight),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     for (i in 0..6) {
                         val dow = firstDayOfWeek.plus(i.toLong())
-                        Text(
-                            text = dow.getDisplayName(java.time.format.TextStyle.SHORT, locale),
-                            style = TextStyle(color = gray, fontSize = textSize, textAlign = TextAlign.Center),
-                            modifier = GlanceModifier.width(cellWidth)
-                        )
+                        Box(
+                            modifier = GlanceModifier.defaultWeight().fillMaxHeight(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = dow.getDisplayName(java.time.format.TextStyle.SHORT, locale),
+                                style = TextStyle(color = gray, fontSize = textSize, textAlign = TextAlign.Center)
+                            )
+                        }
                     }
                 }
 
                 for (r in 0..5) {
                     Row(
-                        modifier = GlanceModifier.fillMaxWidth().height(cellHeight),
+                        modifier = GlanceModifier.fillMaxWidth().defaultWeight(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         for (c in 0..6) {
@@ -128,16 +156,26 @@ class CalendarWidget : GlanceAppWidget() {
                                 else -> dimGray
                             }
 
-                            val cellBg = if (isToday) GlanceModifier.background(Color(0xFF2196F3)) else GlanceModifier
-
                             Box(
-                                modifier = GlanceModifier.width(cellWidth).height(cellHeight).then(cellBg),
+                                modifier = GlanceModifier.defaultWeight().fillMaxHeight(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = date.dayOfMonth.toString(),
-                                    style = TextStyle(color = textColor, fontSize = textSize, fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal, textAlign = TextAlign.Center)
-                                )
+                                if (isToday) {
+                                    Box(
+                                        modifier = GlanceModifier.size(circleSize).background(ImageProvider(R.drawable.bg_circle)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = date.dayOfMonth.toString(),
+                                            style = TextStyle(color = textColor, fontSize = textSize, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                                        )
+                                    }
+                                } else {
+                                    Text(
+                                        text = date.dayOfMonth.toString(),
+                                        style = TextStyle(color = textColor, fontSize = textSize, fontWeight = FontWeight.Normal, textAlign = TextAlign.Center)
+                                    )
+                                }
                             }
                         }
                     }
@@ -152,10 +190,7 @@ class ChangeMonthAction : ActionCallback {
         val delta = parameters[DELTA_KEY] ?: 0
         updateAppWidgetState(context, glanceId) { prefs ->
             val current = prefs[OFFSET_KEY] ?: 0
-            val updated = if (delta == 0) 0 else current + delta
-            prefs.toMutablePreferences().apply {
-                this[OFFSET_KEY] = updated
-            }
+            prefs[OFFSET_KEY] = if (delta == 0) 0 else current + delta
         }
         CalendarWidget().update(context, glanceId)
     }
